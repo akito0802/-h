@@ -188,6 +188,22 @@ function openZoom(){
 
   setupPanZoom(clone, g);
 
+  // create info label
+  let infoLabel = document.createElement('div');
+  infoLabel.id = 'zoomInfoLabel';
+  let keySelect = document.getElementById('keySelect');
+  let genreSelect = document.getElementById('genreSelect');
+  let scaleSelect = document.getElementById('scaleSelect');
+  let keyName = keySelect ? keySelect.value : '';
+  let scaleName = scaleSelect ? scaleSelect.value : '';
+  // collect tensions
+  let tensionChecks = document.querySelectorAll('.tension-checkbox:checked');
+  let tensions = Array.from(tensionChecks).map(cb => cb.value);
+  let tensionText = tensions.length ? ('｜' + tensions.join(', ')) : '';
+  infoLabel.textContent = keyName + '｜' + scaleName + tensionText;
+  document.body.appendChild(infoLabel);
+
+
   // initial fit-to-width & center vertically
   requestAnimationFrame(()=>{
     const stageRect = document.getElementById("zoomStage").getBoundingClientRect();
@@ -206,7 +222,9 @@ function openZoom(){
 
 }
 
-function closeZoom(){
+function closeZoom()
+{
+  let lbl=document.getElementById('zoomInfoLabel'); if(lbl) lbl.remove();{
   const overlay = $("#zoomOverlay");
   overlay.hidden = true;
   document.body.style.overflow="";

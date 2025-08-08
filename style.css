@@ -74,3 +74,20 @@ button { cursor: pointer; } button:hover { border-color: var(--accent); }
 }
 
 @media (max-width: 640px) { .controls { grid-template-columns: 1fr 1fr; } }
+
+
+/* Zoom info label */
+#zoomInfoLabel {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  color: black;
+  padding: 4px 10px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  z-index: 1001;
+  white-space: nowrap;
+}
