@@ -1,4 +1,4 @@
-// v7b: larger cells + cache-busting, robust genre population
+// v8: Tension checkboxes, larger cells, cache-busting
 document.addEventListener("DOMContentLoaded", setup);
 
 const NOTES_12 = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -18,7 +18,7 @@ const SCALE_DEFS = {
   "マイナー・ペンタトニック":[0,3,5,7,10],
   "ブルース・マイナー":[0,3,5,6,7,10],
 
-  // Church Modes（Ionian/Aeolianは各系へ）
+  // Church Modes
   "ドリアン":[0,2,3,5,7,9,10],
   "フリジアン":[0,1,3,5,7,8,10],
   "リディアン":[0,2,4,6,7,9,11],
@@ -49,13 +49,26 @@ const GENRES = {
   ]
 };
 
+// テンション（半音オフセット、root相対）
+const TENSION_MAP = {
+  "b9": 1,
+  "9": 2,
+  "#9": 3,
+  "11": 5,
+  "#11": 6,
+  "b13": 8,
+  "13": 9
+};
+const SEMI_TO_TENSION = Object.fromEntries(Object.entries(TENSION_MAP).map(([k,v])=>[v,k]));
+
 // 設定
 const TUNING = ["E","A","D","G","B","E"]; // 6→1
 const FRETS = 12;
-const CELL_W = 120; // ←さらに大きく
-const CELL_H = 72;  // ←さらに大きく
+const CELL_W = 120;
+const CELL_H = 72;
 
 function $(sel){return document.querySelector(sel);}
+function $all(sel){return Array.from(document.querySelectorAll(sel));}
 function option(v,t){const o=document.createElement("option");o.value=v;o.textContent=t;return o;}
 function mod(n,m){return((n%m)+m)%m;}
 function noteIndex(n){return NOTES_12.indexOf(n);}
@@ -76,13 +89,22 @@ function populateScalesByGenre(){
   GENRES[genre].forEach(s=>sel.appendChild(option(s,s)));
 }
 
-function makeFretboardData(key,scaleName){
-  const root=noteIndex(key), ints=SCALE_DEFS[scaleName];
-  return {rootIdx:root, scaleSet:new Set(ints.map(i=>mod(root+i,12)))};
+function getSelectedTensions(){
+  return $all('.tension:checked').map(el=>el.value);
 }
 
-function generateSVG(key,scaleName,mode="dots"){
-  const {rootIdx,scaleSet}=makeFretboardData(key,scaleName);
+function makeFretboardData(key,scaleName, tensions){
+  const root=noteIndex(key);
+  const base = SCALE_DEFS[scaleName];
+  const tensionSemis = tensions.map(t => TENSION_MAP[t]).filter(v=>v!=null);
+  // base + tensions（12音に正規化）
+  const totalSemis = Array.from(new Set([...base, ...tensionSemis])).map(x=>mod(x,12));
+  const scaleSet = new Set(totalSemis.map(i=>mod(root+i,12)));
+  return {rootIdx:root, scaleSet, tensionSemis};
+}
+
+function generateSVG(key,scaleName,mode="dots", tensions=[]){
+  const {rootIdx, scaleSet, tensionSemis} = makeFretboardData(key,scaleName,tensions);
   const strings=6, frets=FRETS;
   const padL=40, padR=20, padT=30, padB=40;
   const W=padL+padR+CELL_W*(frets+1);
@@ -112,6 +134,7 @@ function generateSVG(key,scaleName,mode="dots"){
     else{ svg.appendChild(circle(x,y,5,"#e2e8f0")); }
   });
 
+  // 音ドット
   for(let s=0;s<strings;s++){
     const drawS=strings-1-s; // 上=1弦
     const open=noteIndex(TUNING[drawS]);
@@ -120,15 +143,31 @@ function generateSVG(key,scaleName,mode="dots"){
       if(scaleSet.has(pitch)){
         const x=padL+CELL_W*(f-0.5);
         const y=padT+CELL_H*s;
-        const isRoot=pitch===rootIdx;
+        const semis = mod(pitch - rootIdx, 12);
+
+        // 種別判定
+        const isRoot = pitch === rootIdx;
+        const isTension = tensionSemis.includes(semis);
+
         const g=group();
-        g.appendChild(circle(x,y,18,isRoot?"var(--root)":"var(--note)",0.95));
+        const fill = isRoot ? "var(--root)" : (isTension ? "var(--tension)" : "var(--note)");
+        const r = 18;
+        g.appendChild(circle(x,y,r,fill,0.95));
+
         let label="";
-        if(mode==="notes") label=NOTES_12[pitch];
-        else if(mode==="degrees") label=DEGREE_LABELS[mod(pitch-rootIdx,12)]||"";
+        if(mode==="notes"){
+          label=NOTES_12[pitch];
+        }else if(mode==="degrees"){
+          if(isTension && SEMI_TO_TENSION[semis]){
+            label = SEMI_TO_TENSION[semis]; // b9, 9, #9, 11, #11, b13, 13
+          }else{
+            label=DEGREE_LABELS[semis]||"";
+          }
+        }
+
         if(label){
           const t=text(x,y+5,label);
-          t.setAttribute("font-size","16");   // bigger labels
+          t.setAttribute("font-size","16");
           t.setAttribute("text-anchor","middle");
           t.setAttribute("fill","#0b0e14");
           t.setAttribute("font-weight","700");
@@ -158,7 +197,11 @@ function text(x,y,str){const e=document.createElementNS("http://www.w3.org/2000/
 function group(){return document.createElementNS("http://www.w3.org/2000/svg","g");}
 
 function render(){
-  const svg=generateSVG($("#keySelect").value,$("#scaleSelect").value,$("#displayMode").value);
+  const key=$("#keySelect").value;
+  const scaleName=$("#scaleSelect").value;
+  const mode=$("#displayMode").value;
+  const tensions = getSelectedTensions();
+  const svg=generateSVG(key,scaleName,mode,tensions);
   $("#fretboard").replaceWith(svg);
   svg.id="fretboard";
 }
@@ -169,7 +212,15 @@ function setup(){
   populateScalesByGenre();
   $("#genreSelect").addEventListener("change",()=>{ populateScalesByGenre(); render(); });
   ["#keySelect","#scaleSelect","#displayMode"].forEach(sel=>$(sel).addEventListener("change",render));
-  $("#downloadBtn").addEventListener("click",downloadPNG);
+  document.getElementById("downloadBtn").addEventListener("click",downloadPNG);
+
+  // tension checkbox events
+  document.getElementById("tensionClearBtn").addEventListener("click", ()=>{
+    document.querySelectorAll('.tension').forEach(el=>el.checked=false);
+    render();
+  });
+  document.querySelectorAll('.tension').forEach(el=>el.addEventListener("change", render));
+
   render();
 }
 
@@ -195,7 +246,8 @@ function downloadPNG(){
       const key=$("#keySelect").value;
       const genre=$("#genreSelect").value;
       const scaleName=$("#scaleSelect").value;
-      a.download=`fretboard_${key}_${genre}_${scaleName}.png`;
+      const tens=getSelectedTensions().join('-')||'none';
+      a.download=`fretboard_${key}_${genre}_${scaleName}_tensions-${tens}.png`;
       a.click();
     },"image/png");
   };
