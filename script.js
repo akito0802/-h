@@ -209,7 +209,7 @@ const GENRES = {
   const mod=(n,m)=>((n%m)+m)%m;
   const noteIndex=(n)=>NOTES_12.indexOf(n);
 
-  function buildKeyOptions(){ const sel=$("#keySelect"); if(!sel) return; sel.innerHTML=""; NOTES_12.forEach(n=>sel.appendChild(option(n,n))); sel.value=sel.value||"C"; }
+  function buildKeyOptions(){ const sel=$("#keySelect"); if(!sel) return; sel.innerHTML=""; NOTES_12.forEach(n=>sel.appendChild(option(n,n))); sel.value="C"; }
   function buildGenreOptions(){ const sel=$("#genreSelect"); if(!sel) return; sel.innerHTML=""; Object.keys(GENRES).forEach(g=>sel.appendChild(option(g,g))); sel.value=sel.value||"メジャー系"; }
   function populateScalesByGenre(){ const g=$("#genreSelect"); const s=$("#scaleSelect"); if(!g||!s) return; s.innerHTML=""; (GENRES[g.value]||[]).forEach(n=>s.appendChild(option(n,n))); if(!s.value) s.value=s.options[0]?.value||""; }
 
@@ -433,6 +433,7 @@ const GENRES = {
   }
 
   function setup(){
+  const _forceRenderInstrument = ()=> { try { renderInstrument(); } catch(e){ console.error('renderInstrument failed', e); } };
     buildKeyOptions();
     buildGenreOptions();
     populateScalesByGenre();
@@ -444,7 +445,7 @@ const GENRES = {
 
     // First render + sanity retry
     renderInstrument();
-    setTimeout(()=>{
+    setTimeout(()=>{ _forceRenderInstrument();
       const g=$("#genreSelect"), s=$("#scaleSelect");
       if(g && s && (g.options.length===0 || s.options.length===0)){ buildKeyOptions(); buildGenreOptions(); populateScalesByGenre(); renderInstrument(); }
     }, 200);
@@ -770,3 +771,11 @@ function renderInstrument(){
   renderScaleTable(key, scaleName, tensions);
   svg.addEventListener('click', openZoom);
 }
+
+
+/* debug helpers */
+window.__dbgInstrument = () => {
+  const inst = document.getElementById('instrumentSelect')?.value;
+  console.log('[inst]', inst);
+  return inst;
+};
