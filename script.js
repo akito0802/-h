@@ -200,14 +200,11 @@
     // initial fit-to-width + vertical center
     if(fitWidth){
       requestAnimationFrame(()=>{
-        const rect = document.getElementById('zoomStage').getBoundingClientRect();
+        // Fit-to-width is handled by preserveAspectRatio='xMidYMid meet'.
+        // To keep the fretboard perfectly centered, don't add manual offsets.
         const vb = svg.viewBox.baseVal;
-        scale = 1; // width is auto-fitted by preserveAspectRatio
-        const stageToSvg = vb.width / rect.width;
-        const contentH = vb.height * scale;
-        const stageH_inSvg = rect.height * stageToSvg;
-        ty = (stageH_inSvg - contentH) / 2;
-        tx = 0;
+        scale = 1;
+        tx = 0; ty = 0; // let SVG handle centering
         apply();
       });
     }
