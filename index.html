@@ -53,6 +53,7 @@
   <main>
     <div id="fretboardWrapper">
       <svg id="fretboard" xmlns="http://www.w3.org/2000/svg" aria-label="ギター指板"></svg>
+      <div class="hint">※指板をタップ/クリックで拡大（ピンチで拡大縮小・ドラッグで移動）</div>
     </div>
 
     <section id="tableSection">
@@ -65,7 +66,16 @@
     <p>標準チューニング E A D G B E / 12フレット / スマホ対応</p>
   </footer>
 
+  <!-- Zoom Overlay -->
+  <div id="zoomOverlay" hidden>
+    <div class="zoomBar">
+      <button id="zoomClose" aria-label="閉じる">×</button>
+      <div class="zoomTips">ピンチで拡大縮小・1本指ドラッグで移動・ダブルタップで等倍</div>
+    </div>
+    <div id="zoomStage"></div>
+  </div>
+
   <noscript>このページはJavaScriptを使用します。ブラウザ設定で有効にしてください。</noscript>
-  <script src="script.js?v=9"></script>
+  <script src="script.js?v=10"></script>
 </body>
 </html>

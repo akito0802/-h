@@ -52,24 +52,10 @@ select, button {
 button { cursor: pointer; }
 button:hover { border-color: var(--accent); }
 
-.tension-panel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  align-items: center;
-  margin-top: 6px;
-}
+.tension-panel { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 6px; }
 .tension-title { font-size: 14px; color: var(--muted); }
-.tension-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 12px;
-}
-.tension-list label {
-  color: var(--text);
-  font-size: 14px;
-  gap: 6px;
-}
+.tension-list { display: flex; flex-wrap: wrap; gap: 10px 12px; }
+.tension-list label { color: var(--text); font-size: 14px; gap: 6px; }
 .tension-actions { margin-left: auto; }
 #tensionClearBtn { width: auto; padding: 6px 10px; }
 
@@ -83,31 +69,49 @@ button:hover { border-color: var(--accent); }
   border: 1px solid #cbd5e1;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
+.hint { color: #94a3b8; font-size: 12px; margin-top: 6px; }
 
 #tableSection { padding: 12px; }
 #tableSection h2 { font-size: 16px; margin: 8px 0 10px; color: var(--muted); }
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--row);
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.table th, .table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #eef2f7;
-  font-size: 14px;
-}
-.table th {
-  text-align: left;
-  background: #f8fafc;
-  color: #475569;
-}
+.table { width: 100%; border-collapse: collapse; background: var(--row); border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+.table th, .table td { padding: 10px 12px; border-bottom: 1px solid #eef2f7; font-size: 14px; }
+.table th { text-align: left; background: #f8fafc; color: #475569; }
 .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
 .badge-root { background: #fee2c5; color: #7a3e00; }
 .badge-scale { background: #dbeafe; color: #1e40af; }
 .badge-tension { background: #ede9fe; color: #5b21b6; }
+
+/* Zoom overlay */
+#zoomOverlay[hidden] { display: none; }
+#zoomOverlay {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+.zoomBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+#zoomClose {
+  width: 36px; height: 36px; border-radius: 8px;
+  border: 1px solid #cbd5e1; background: #ffffff;
+  font-size: 20px; line-height: 1;
+}
+.zoomTips { color: #64748b; font-size: 12px; }
+#zoomStage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  touch-action: none; /* enable custom gestures */
+  background: #ffffff;
+}
 
 @media (max-width: 640px) {
   .controls { grid-template-columns: 1fr 1fr; }
