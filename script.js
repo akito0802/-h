@@ -1,10 +1,9 @@
-// v10: pinch-zoom overlay for fretboard + previous v9 features
+// v11: minimal fullscreen fretboard (tap to open/close), pinch/pan zoom, no bars
 document.addEventListener("DOMContentLoaded", setup);
 
 const NOTES_12 = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const DEGREE_LABELS = ["1","b2","2","b3","3","4","#4","5","b6","6","b7","7"];
 
-// スケール定義（半音）
 const SCALE_DEFS = {
   "メジャー（Ionian）":[0,2,4,5,7,9,11],
   "メジャー・ペンタトニック":[0,2,4,7,9],
@@ -159,8 +158,11 @@ function renderScaleTable(key, scaleName, tensions){
   host.appendChild(table);
 }
 
-// ---------- Zoom overlay (pinch & pan) ----------
+// ---------- Minimal fullscreen zoom (tap to open/close) ----------
+let _zooming = false;
 function openZoom(){
+  if(_zooming) return;
+  _zooming = true;
   const overlay = $("#zoomOverlay");
   const stage = $("#zoomStage");
   stage.innerHTML = "";
@@ -168,23 +170,30 @@ function openZoom(){
   // Clone current fretboard SVG
   const src = $("#fretboard");
   const clone = src.cloneNode(true);
-  clone.removeAttribute("id"); // avoid id dup
-  // Wrap children into a group we can transform
+  clone.removeAttribute("id");
   const vb = clone.viewBox.baseVal;
   const g = document.createElementNS("http://www.w3.org/2000/svg","g");
-  // move all children into g
   while(clone.firstChild){ g.appendChild(clone.firstChild); }
   clone.appendChild(g);
   g.setAttribute("id","zoomTransform");
   stage.appendChild(clone);
 
-  // Fit SVG to stage
-  clone.style.width = "100%";
-  clone.style.height = "100%";
+  clone.style.width="100%";
+  clone.style.height="100%";
   clone.setAttribute("preserveAspectRatio","xMidYMid meet");
 
+  // prevent background scroll
+  document.body.style.overflow="hidden";
   overlay.hidden = false;
+
   setupPanZoom(clone, g);
+}
+
+function closeZoom(){
+  const overlay = $("#zoomOverlay");
+  overlay.hidden = true;
+  document.body.style.overflow="";
+  _zooming = false;
 }
 
 function setupPanZoom(svg, g){
@@ -194,9 +203,7 @@ function setupPanZoom(svg, g){
   let lastDist = null;
   let lastCenter = null;
 
-  function apply(){
-    g.setAttribute("transform", `translate(${tx},${ty}) scale(${scale})`);
-  }
+  function apply(){ g.setAttribute("transform", `translate(${tx},${ty}) scale(${scale})`); }
 
   function getPoint(evt){
     const rect = svg.getBoundingClientRect();
@@ -204,71 +211,47 @@ function setupPanZoom(svg, g){
     const y = (evt.clientY - rect.top) * (svg.viewBox.baseVal.height / rect.height);
     return {x,y};
   }
-
-  function distance(a,b){
-    const dx = a.x - b.x, dy = a.y - b.y;
-    return Math.hypot(dx,dy);
-  }
-
+  function distance(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
   function center(a,b){ return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
 
-  function onPointerDown(e){
-    svg.setPointerCapture(e.pointerId);
-    pointers.set(e.pointerId, getPoint(e));
-  }
+  function onPointerDown(e){ svg.setPointerCapture(e.pointerId); pointers.set(e.pointerId, getPoint(e)); }
   function onPointerMove(e){
     if(!pointers.has(e.pointerId)) return;
     pointers.set(e.pointerId, getPoint(e));
     if(pointers.size===1){
-      // Pan
-      const p = Array.from(pointers.values())[0];
-      if(lastCenter){
-        tx += (p.x - lastCenter.x);
-        ty += (p.y - lastCenter.y);
-        apply();
-      }
+      const p=[...pointers.values()][0];
+      if(lastCenter){ tx += (p.x-lastCenter.x); ty += (p.y-lastCenter.y); apply(); }
       lastCenter = p;
     }else if(pointers.size===2){
-      const [p1,p2] = Array.from(pointers.values());
+      const [p1,p2] = [...pointers.values()];
       const c = center(p1,p2);
       const d = distance(p1,p2);
       if(lastDist && lastCenter){
-        const ds = d / lastDist;
-        // zoom around center
+        const ds = d/lastDist;
         const preX = (c.x - tx) / scale;
         const preY = (c.y - ty) / scale;
-        scale *= ds;
-        // clamp scale
-        scale = Math.max(1, Math.min(8, scale));
+        scale = Math.max(1, Math.min(8, scale*ds));
         tx = c.x - preX * scale;
         ty = c.y - preY * scale;
         apply();
       }
-      lastDist = d;
-      lastCenter = c;
+      lastDist = d; lastCenter = c;
     }
     e.preventDefault();
   }
-  function onPointerUp(e){
-    pointers.delete(e.pointerId);
-    if(pointers.size===0){ lastDist=null; lastCenter=null; }
-  }
+  function onPointerUp(e){ pointers.delete(e.pointerId); if(pointers.size===0){ lastDist=null; lastCenter=null; } }
   function onWheel(e){
     const c = getPoint(e);
     const preX = (c.x - tx) / scale;
     const preY = (c.y - ty) / scale;
     const delta = e.deltaY < 0 ? 1.1 : 0.9;
-    scale *= delta;
-    scale = Math.max(1, Math.min(8, scale));
+    scale = Math.max(1, Math.min(8, scale*delta));
     tx = c.x - preX * scale;
     ty = c.y - preY * scale;
     apply();
     e.preventDefault();
   }
-  function onDblClick(){
-    // reset
-    scale = 1; tx = 0; ty = 0; apply();
-  }
+  function onDblClick(){ scale=1; tx=0; ty=0; apply(); }
 
   svg.addEventListener("pointerdown", onPointerDown);
   svg.addEventListener("pointermove", onPointerMove);
@@ -276,10 +259,14 @@ function setupPanZoom(svg, g){
   svg.addEventListener("pointercancel", onPointerUp);
   svg.addEventListener("wheel", onWheel, {passive:false});
   svg.addEventListener("dblclick", onDblClick);
-}
 
-function closeZoom(){
-  $("#zoomOverlay").hidden = true;
+  // tap anywhere to close (except when dragging/zooming)
+  const overlay = $("#zoomOverlay");
+  overlay.addEventListener("click", (e)=>{
+    // If user is actively moving/zooming, skip
+    if(pointers.size>0) return;
+    closeZoom();
+  });
 }
 
 // SVG helpers
@@ -298,7 +285,6 @@ function render(){
   $("#fretboard").replaceWith(svg);
   svg.id="fretboard";
   renderScaleTable(key, scaleName, tensions);
-  // attach click to open zoom
   svg.addEventListener("click", openZoom);
 }
 
@@ -315,8 +301,6 @@ function setup(){
     render();
   });
   document.querySelectorAll('.tension').forEach(el=>el.addEventListener("change", render));
-
-  document.getElementById("zoomClose").addEventListener("click", closeZoom);
 
   render();
 }
