@@ -507,3 +507,69 @@ function closeTheory(){ theoryModal.hidden = true; }
 if(theoryBtn){ theoryBtn.addEventListener('click', openTheory); }
 if(theoryClose){ theoryClose.addEventListener('click', closeTheory); }
 theoryModal?.addEventListener('click', (e)=>{ if(e.target === theoryModal) closeTheory(); });
+
+
+
+// ---- Theory modal (robust) ----
+(function(){
+  function ensureModal(){
+    let modal = document.getElementById('theoryModal');
+    if(modal) return modal;
+    // create modal dynamically if missing
+    modal = document.createElement('div');
+    modal.id = 'theoryModal';
+    modal.hidden = true;
+    modal.innerHTML = `
+      <div class="theory-dialog" role="dialog" aria-modal="true" aria-labelledby="theoryTitle">
+        <div class="theory-header">
+          <h3 id="theoryTitle">スケールの説明</h3>
+          <button id="theoryClose" aria-label="閉じる">×</button>
+        </div>
+        <div id="theoryBody" class="theory-body"></div>
+      </div>`;
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  function openTheory(){
+    const modal = ensureModal();
+    const body = modal.querySelector('#theoryBody');
+    const keySel = document.getElementById('keySelect');
+    const scaleSel = document.getElementById('scaleSelect');
+    if(!keySel || !scaleSel){ console.warn('[theory] selects not ready'); return; }
+    const key = keySel.value;
+    const selectedText = scaleSel.options[scaleSel.selectedIndex]?.text?.trim() || scaleSel.value;
+    const pureName = selectedText.replace(/^.*?\s*\|\s*/, '').replace(/\s*\|.*$/, '');
+    const info = (typeof SCALE_THEORY!=='undefined' && SCALE_THEORY[pureName]) ? SCALE_THEORY[pureName] : {};
+    const desc = (typeof SCALE_DESCRIPTIONS!=='undefined' && SCALE_DESCRIPTIONS[pureName]) ? SCALE_DESCRIPTIONS[pureName] : '';
+
+    const rows = [
+      ['キー', key],
+      ['スケール', pureName],
+      ['親スケール/モード', info.parent || '-'],
+      ['度数/構成', info.formula || '-'],
+      ['テンション', info.tensions || '-'],
+      ['適用コード', info.typical_chords || '-'],
+      ['使用上の要点', desc || info.usage || '-']
+    ];
+
+    body.innerHTML = rows.map(([l,v])=>`<div class="row"><span class="label">${l}</span><span class="value">${v}</span></div>`).join('');
+    modal.hidden = false;
+
+    // wire close each time
+    modal.querySelector('#theoryClose')?.addEventListener('click', ()=>{ modal.hidden = true; }, {once:true});
+    modal.addEventListener('click', (e)=>{ if(e.target === modal){ modal.hidden = true; } }, {once:true});
+  }
+
+  function bindTheory(){
+    const btn = document.getElementById('theoryBtn');
+    if(btn){ btn.addEventListener('click', openTheory); return true; }
+    return false;
+  }
+
+  if(!bindTheory()){
+    // try again after first render
+    document.addEventListener('readystatechange', ()=>{ if(document.readyState==='complete') bindTheory(); });
+    setTimeout(bindTheory, 300);
+  }
+})();
