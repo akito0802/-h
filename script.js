@@ -130,6 +130,11 @@ const SCALE_THEORY = {
 // v14: clean baseline with robust init, fit-to-width zoom, info label
 (function(){
 
+// --- safe query helpers (define before any usage) ---
+if (typeof window.$ === 'undefined') { window.$ = (s)=>document.querySelector(s); }
+if (typeof window.$$ === 'undefined') { window.$$ = (s)=>Array.from(document.querySelectorAll(s)); }
+
+
 // ===== Instrument Config =====
 const INSTRUMENTS = {
   guitar: { name: "ギター", strings: ["E","A","D","G","B","E"], frets: 12, cellH: 72 },
