@@ -1,5 +1,5 @@
 // v11: minimal fullscreen fretboard (tap to open/close), pinch/pan zoom, no bars
-document.addEventListener("DOMContentLoaded", ()=>{ try { setup(); } catch(e){ console.error('Setup error', e); } });
+document.addEventListener("DOMContentLoaded", setup);
 
 const NOTES_12 = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const DEGREE_LABELS = ["1","b2","2","b3","3","4","#4","5","b6","6","b7","7"];
@@ -40,9 +40,9 @@ function option(v,t){const o=document.createElement("option");o.value=v;o.textCo
 function mod(n,m){return((n%m)+m)%m;}
 function noteIndex(n){return NOTES_12.indexOf(n);}
 
-function buildKeyOptions(){ const sel=$("#keySelect"); if(!sel) return; sel.innerHTML=""; NOTES_12.forEach(n=>sel.appendChild(option(n,n))); sel.value=sel.value||"C"; }
-function buildGenreOptions(){ const sel=$("#genreSelect"); if(!sel) return; sel.innerHTML=""; Object.keys(GENRES).forEach(g=>sel.appendChild(option(g,g))); sel.value=sel.value||"メジャー系"; }
-function populateScalesByGenre(){ const g=$("#genreSelect"); const s=$("#scaleSelect"); if(!g||!s) return; s.innerHTML=""; (GENRES[g.value]||[]).forEach(n=>s.appendChild(option(n,n))); }
+function buildKeyOptions(){ const sel=$("#keySelect"); sel.innerHTML=""; NOTES_12.forEach(n=>sel.appendChild(option(n,n))); sel.value="C"; }
+function buildGenreOptions(){ const sel=$("#genreSelect"); sel.innerHTML=""; Object.keys(GENRES).forEach(g=>sel.appendChild(option(g,g))); sel.value="メジャー系"; }
+function populateScalesByGenre(){ const g=$("#genreSelect").value; const s=$("#scaleSelect"); s.innerHTML=""; GENRES[g].forEach(n=>s.appendChild(option(n,n))); }
 
 function getSelectedTensions(){ return $all('.tension:checked').map(el=>el.value); }
 
@@ -188,22 +188,6 @@ function openZoom(){
 
   setupPanZoom(clone, g);
 
-  // create info label
-  let infoLabel = document.createElement('div');
-  infoLabel.id = 'zoomInfoLabel';
-  let keySelect = document.getElementById('keySelect');
-  let genreSelect = document.getElementById('genreSelect');
-  let scaleSelect = document.getElementById('scaleSelect');
-  let keyName = keySelect && keySelect.value ? keySelect.value : 'C';
-  let scaleName = scaleSelect && scaleSelect.value ? scaleSelect.value : 'メジャー（Ionian）';
-  // collect tensions
-  let tensionChecks = document.querySelectorAll('.tension:checked');
-  let tensions = Array.from(tensionChecks).map(cb => cb.value);
-  let tensionText = tensions.length ? ('｜' + tensions.join(', ')) : '';
-  infoLabel.textContent = keyName + '｜' + scaleName + tensionText;
-  document.body.appendChild(infoLabel);
-
-
   // initial fit-to-width & center vertically
   requestAnimationFrame(()=>{
     const stageRect = document.getElementById("zoomStage").getBoundingClientRect();
@@ -222,9 +206,7 @@ function openZoom(){
 
 }
 
-function closeZoom()
-{
-  let lbl=document.getElementById('zoomInfoLabel'); if(lbl) lbl.remove();{
+function closeZoom(){
   const overlay = $("#zoomOverlay");
   overlay.hidden = true;
   document.body.style.overflow="";
@@ -311,7 +293,7 @@ function circle(cx,cy,r,fill,op){const e=document.createElementNS("http://www.w3
 function text(x,y,str){const e=document.createElementNS("http://www.w3.org/2000/svg","text");e.setAttribute("x",x);e.setAttribute("y",y);e.textContent=str;return e;}
 function group(){return document.createElementNS("http://www.w3.org/2000/svg","g");}
 
-function render(){ try {
+function render(){
   const key=$("#keySelect").value;
   const scaleName=$("#scaleSelect").value;
   const mode=$("#displayMode").value;
@@ -321,7 +303,7 @@ function render(){ try {
   svg.id="fretboard";
   renderScaleTable(key, scaleName, tensions);
   svg.addEventListener("click", openZoom);
-} catch(e){ console.error('Render error', e); }
+}
 
 function setup(){
   buildKeyOptions();
