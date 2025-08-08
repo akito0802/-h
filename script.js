@@ -1,18 +1,50 @@
-// スケール指板ビューア（SVG）
-// 前提: 標準チューニング E A D G B E, 6弦, 22フレット
+// スケール指板ビューア（SVG） v4
+// 仕様: 12フレット / 明るめテーマ / 1弦が上, 6弦が下 / 3段階選択（キー→ジャンル→スケール）
 
 const NOTES_12 = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const DEGREE_LABELS = ["1","b2","2","b3","3","4","#4","5","b6","6","b7","7"];
 
-// スケール定義（半音インターバルの配列）
-const SCALES = {
+// スケール定義（半音インターバル）
+const SCALE_DEFS = {
+  // Major系
   "メジャー（Ionian）":[0,2,4,5,7,9,11],
-  "ナチュラルマイナー（Aeolian）":[0,2,3,5,7,8,10],
+  "メジャー・ペンタトニック":[0,2,4,7,9],
+  "ブルース・メジャー":[0,2,3,4,7,9], // メジャーペンタ + ♭3（扱い諸説）
+  // Minor系
+  "ナチュラル・マイナー（Aeolian）":[0,2,3,5,7,8,10],
+  "ハーモニック・マイナー":[0,2,3,5,7,8,11],
+  "メロディック・マイナー（上行）":[0,2,3,5,7,9,11],
+  "マイナー・ペンタトニック":[0,3,5,7,10],
+  "ブルース・マイナー":[0,3,5,6,7,10],
+  // Church Modes（Ionian/AeolianはMajor/Minorに振り分け済み）
   "ドリアン":[0,2,3,5,7,9,10],
+  "フリジアン":[0,1,3,5,7,8,10],
+  "リディアン":[0,2,4,6,7,9,11],
   "ミクソリディアン":[0,2,4,5,7,9,10],
-  "ペンタトニック・メジャー":[0,2,4,7,9],
-  "ペンタトニック・マイナー":[0,3,5,7,10],
-  "ブルース・マイナー":[0,3,5,6,7,10]
+  "ロクリアン":[0,1,3,5,6,8,10]
+};
+
+// ジャンル→スケールの紐づけ
+const GENRES = {
+  "メジャー系":[
+    "メジャー（Ionian）",
+    "メジャー・ペンタトニック",
+    "ブルース・メジャー"
+  ],
+  "マイナー系":[
+    "ナチュラル・マイナー（Aeolian）",
+    "ハーモニック・マイナー",
+    "メロディック・マイナー（上行）",
+    "マイナー・ペンタトニック",
+    "ブルース・マイナー"
+  ],
+  "チャーチモード":[
+    "ドリアン",
+    "フリジアン",
+    "リディアン",
+    "ミクソリディアン",
+    "ロクリアン"
+  ]
 };
 
 // 標準チューニング (低音側から): E2 A2 D3 G3 B3 E4
@@ -22,10 +54,7 @@ const FRETS = 12;
 const $ = (sel)=>document.querySelector(sel);
 
 function mod(n, m){ return ((n % m) + m) % m; }
-
-function noteIndex(note){
-  return NOTES_12.indexOf(note);
-}
+function noteIndex(note){ return NOTES_12.indexOf(note); }
 
 function buildKeyOptions(){
   const keySel = $("#keySelect");
@@ -38,20 +67,32 @@ function buildKeyOptions(){
   });
 }
 
-function buildScaleOptions(){
-  const sel = $("#scaleSelect");
-  Object.keys(SCALES).forEach(name => {
+function buildGenreOptions(){
+  const gSel = $("#genreSelect");
+  Object.keys(GENRES).forEach(g => {
+    const opt = document.createElement("option");
+    opt.value = g;
+    opt.textContent = g;
+    gSel.appendChild(opt);
+  });
+  gSel.value = "メジャー系";
+}
+
+function populateScalesByGenre(){
+  const genre = $("#genreSelect").value;
+  const sSel = $("#scaleSelect");
+  sSel.innerHTML = "";
+  GENRES[genre].forEach(name => {
     const opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
-    sel.appendChild(opt);
+    sSel.appendChild(opt);
   });
-  sel.value = "メジャー（Ionian）";
 }
 
 function makeFretboardData(keyRoot, scaleName){
   const rootIdx = noteIndex(keyRoot);
-  const intervals = SCALES[scaleName];
+  const intervals = SCALE_DEFS[scaleName];
   const scaleSet = new Set(intervals.map(i => mod(rootIdx + i, 12)));
   return {rootIdx, intervals, scaleSet};
 }
@@ -59,11 +100,10 @@ function makeFretboardData(keyRoot, scaleName){
 function generateSVG(keyRoot, scaleName, mode="dots"){
   const {rootIdx, intervals, scaleSet} = makeFretboardData(keyRoot, scaleName);
 
-  // SVG サイズ（レスポンシブにスケール）
   const strings = 6;
   const frets = FRETS;
-  const cellW = 80;  // 基準横幅（px）
-  const cellH = 48;  // 基準縦幅（px）
+  const cellW = 80;  // 大きめ
+  const cellH = 48;  // 大きめ
   const padL = 40, padR = 20, padT = 30, padB = 36;
 
   const W = padL + padR + cellW * (frets + 1);
@@ -74,55 +114,52 @@ function generateSVG(keyRoot, scaleName, mode="dots"){
   svg.setAttribute("role","img");
 
   // 背景
-  const bg = rect(0,0,W,H,"#0f131b");
+  const bg = rect(0,0,W,H,"#ffffff");
   bg.setAttribute("rx","12"); bg.setAttribute("ry","12");
   svg.appendChild(bg);
 
-  // フレット線・指板背景
+  // フレット線
   for(let f=0; f<=frets; f++){
     const x = padL + cellW * f;
     const col = f===0 ? "#b08968" : "var(--fret)";
     const w = f===0 ? 6 : (f%12===0 ? 2.5 : 1.5);
     svg.appendChild(line(x, padT, x, H-padB, col, w));
   }
-  // 弦
-  for(let s=0; s<strings; s++){ // reversed draw
-    const drawS = strings - 1 - s;
+  // 弦（上=1弦, 下=6弦）
+  for(let s=0; s<strings; s++){
     const y = padT + cellH * s;
     svg.appendChild(line(padL, y, W-padR, y, "var(--string)", 1.4));
   }
 
-  // ポジションマーク（一般的な 3,5,7,9,12,15,17,19）
-  const markers = [3,5,7,9,12,15,17,19];
+  // ポジションマーク（3,5,7,9,12）
+  const markers = [3,5,7,9,12];
   markers.forEach(f => {
     const xCenter = padL + cellW*(f-0.5);
     const yCenter = padT + cellH*(strings-1)/2;
     if(f===12){
-      // ダブルドット
-      svg.appendChild(circle(xCenter-8, yCenter-8, 4, "#2f3b4f"));
-      svg.appendChild(circle(xCenter+8, yCenter+8, 4, "#2f3b4f"));
+      svg.appendChild(circle(xCenter-8, yCenter-8, 4, "#e2e8f0"));
+      svg.appendChild(circle(xCenter+8, yCenter+8, 4, "#e2e8f0"));
     }else{
-      svg.appendChild(circle(xCenter, yCenter, 4, "#2f3b4f"));
+      svg.appendChild(circle(xCenter, yCenter, 4, "#e2e8f0"));
     }
   });
 
-  // 音のドット
-  for(let s=0; s<strings; s++){ // reversed draw
-    const drawS = strings - 1 - s;
+  // 音のドット（1弦が上に来るように TUNING を逆参照）
+  for(let s=0; s<strings; s++){
+    const drawS = strings - 1 - s; // 0行目=1弦（E4）
     const openNoteIdx = noteIndex(TUNING[drawS]);
     for(let f=0; f<=frets; f++){
       const pitch = mod(openNoteIdx + f, 12);
       if(scaleSet.has(pitch)){
         const xCenter = padL + cellW*(f-0.5);
-        const y = padT + cellH*s; // unchanged y mapping because we reversed tuning above
+        const y = padT + cellH*s;
         const isRoot = pitch === rootIdx;
 
-        const r = 12;
+        const r = 14;
         const fill = isRoot ? "var(--root)" : "var(--note)";
         const g = group();
         g.appendChild(circle(xCenter, y, r, fill, 0.95));
 
-        // テキスト（音名 or 度数）
         let label = "";
         if(mode === "notes"){
           label = NOTES_12[pitch];
@@ -132,7 +169,7 @@ function generateSVG(keyRoot, scaleName, mode="dots"){
         }
         if(label){
           const t = text(xCenter, y+4, label);
-          t.setAttribute("font-size","10");
+          t.setAttribute("font-size","11");
           t.setAttribute("text-anchor","middle");
           t.setAttribute("fill","#0b0e14");
           t.setAttribute("font-weight","700");
@@ -148,7 +185,7 @@ function generateSVG(keyRoot, scaleName, mode="dots"){
     const tx = padL + cellW*f;
     const t = text(tx+4, H-10, String(f));
     t.setAttribute("font-size","10");
-    t.setAttribute("fill","#93a1b2");
+    t.setAttribute("fill","#475569");
     svg.appendChild(t);
   }
 
@@ -192,14 +229,19 @@ function render(){
   const mode = $("#displayMode").value;
   const svg = generateSVG(key, scale, mode);
   const host = $("#fretboard");
-  // 置き換え
   host.replaceWith(svg);
   svg.id = "fretboard";
 }
 
 function setup(){
   buildKeyOptions();
-  buildScaleOptions();
+  buildGenreOptions();
+  populateScalesByGenre();
+  // 連動
+  $("#genreSelect").addEventListener("change", ()=>{
+    populateScalesByGenre();
+    render();
+  });
   ["#keySelect", "#scaleSelect", "#displayMode"].forEach(sel=>{
     document.querySelector(sel).addEventListener("change", render);
   });
@@ -217,7 +259,7 @@ function downloadPNG(){
 
   const img = new Image();
   img.onload = function(){
-    const scale = 2; // 2xで綺麗に
+    const scale = 2;
     const canvas = document.createElement("canvas");
     const vb = svgEl.viewBox.baseVal;
     canvas.width = vb.width * scale;
@@ -230,8 +272,9 @@ function downloadPNG(){
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       const key = document.getElementById("keySelect").value;
+      const genre = document.getElementById("genreSelect").value;
       const scaleName = document.getElementById("scaleSelect").value;
-      a.download = `fretboard_${key}_${scaleName}.png`;
+      a.download = `fretboard_${key}_${genre}_${scaleName}.png`;
       a.click();
     }, "image/png");
   };
