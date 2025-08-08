@@ -24,10 +24,7 @@ header {
   z-index: 10;
   border-bottom: 1px solid #cbd5e1;
 }
-h1 {
-  font-size: 18px;
-  margin: 0 0 8px;
-}
+h1 { font-size: 18px; margin: 0 0 8px; }
 .controls {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr auto;
