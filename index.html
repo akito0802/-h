@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>スケール指板ビューア</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>スケール指板ビューア</h1>
+    <div class="controls">
+      <label>キー
+        <select id="keySelect"></select>
+      </label>
+      <label>スケール
+        <select id="scaleSelect"></select>
+      </label>
+      <label>表示
+        <select id="displayMode">
+          <option value="dots">● ドット</option>
+          <option value="notes">♪ 音名</option>
+          <option value="degrees">度数</option>
+        </select>
+      </label>
+      <button id="downloadBtn">画像を保存（PNG）</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="fretboardWrapper">
+      <svg id="fretboard" xmlns="http://www.w3.org/2000/svg" aria-label="ギター指板"></svg>
+    </div>
+  </main>
+
+  <footer>
+    <p>標準チューニング E A D G B E / 22フレット・スマホ対応 / GitHub Pages でそのまま公開OK</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
