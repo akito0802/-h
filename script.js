@@ -17,7 +17,7 @@ const SCALES = {
 
 // 標準チューニング (低音側から): E2 A2 D3 G3 B3 E4
 const TUNING = ["E","A","D","G","B","E"]; // 6 to 1
-const FRETS = 22;
+const FRETS = 12;
 
 const $ = (sel)=>document.querySelector(sel);
 
@@ -62,8 +62,8 @@ function generateSVG(keyRoot, scaleName, mode="dots"){
   // SVG サイズ（レスポンシブにスケール）
   const strings = 6;
   const frets = FRETS;
-  const cellW = 60;  // 基準横幅（px）
-  const cellH = 36;  // 基準縦幅（px）
+  const cellW = 80;  // 基準横幅（px）
+  const cellH = 48;  // 基準縦幅（px）
   const padL = 40, padR = 20, padT = 30, padB = 36;
 
   const W = padL + padR + cellW * (frets + 1);
@@ -86,7 +86,8 @@ function generateSVG(keyRoot, scaleName, mode="dots"){
     svg.appendChild(line(x, padT, x, H-padB, col, w));
   }
   // 弦
-  for(let s=0; s<strings; s++){
+  for(let s=0; s<strings; s++){ // reversed draw
+    const drawS = strings - 1 - s;
     const y = padT + cellH * s;
     svg.appendChild(line(padL, y, W-padR, y, "var(--string)", 1.4));
   }
@@ -106,13 +107,14 @@ function generateSVG(keyRoot, scaleName, mode="dots"){
   });
 
   // 音のドット
-  for(let s=0; s<strings; s++){
-    const openNoteIdx = noteIndex(TUNING[s]);
+  for(let s=0; s<strings; s++){ // reversed draw
+    const drawS = strings - 1 - s;
+    const openNoteIdx = noteIndex(TUNING[drawS]);
     for(let f=0; f<=frets; f++){
       const pitch = mod(openNoteIdx + f, 12);
       if(scaleSet.has(pitch)){
         const xCenter = padL + cellW*(f-0.5);
-        const y = padT + cellH*s;
+        const y = padT + cellH*s; // unchanged y mapping because we reversed tuning above
         const isRoot = pitch === rootIdx;
 
         const r = 12;
