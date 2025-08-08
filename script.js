@@ -187,6 +187,23 @@ function openZoom(){
   overlay.hidden = false;
 
   setupPanZoom(clone, g);
+
+  // initial fit-to-width & center vertically
+  requestAnimationFrame(()=>{
+    const stageRect = document.getElementById("zoomStage").getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    // scale so that vb.width * scale matches stage width in SVG units
+    // Since the outer SVG already scales to stage width, scale=1 is effectively fit-to-width.
+    // We'll still ensure centering vertically by translating to middle.
+    scale = 1;
+    const stageToSvg = vb.width / stageRect.width; // px -> svg units
+    const contentH = vb.height * scale;
+    const stageH_inSvg = stageRect.height * stageToSvg;
+    ty = (stageH_inSvg - contentH) / 2;
+    tx = 0;
+    apply();
+  });
+
 }
 
 function closeZoom(){
