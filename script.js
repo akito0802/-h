@@ -53,7 +53,7 @@ function makeFretboardData(key,scaleName){
 }
 function generateSVG(key,scaleName,mode="dots"){
   const {rootIdx,scaleSet}=makeFretboardData(key,scaleName);
-  const strings=6, frets=FRETS, cellW=80, cellH=48, padL=40, padR=20, padT=30, padB=36;
+  const strings=6, frets=FRETS, cellW=100, cellH=60, padL=40, padR=20, padT=30, padB=36;
   const W=padL+padR+cellW*(frets+1), H=padT+padB+cellH*(strings-1);
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
@@ -62,8 +62,8 @@ function generateSVG(key,scaleName,mode="dots"){
   for(let f=0;f<=frets;f++){svg.appendChild(line(padL+cellW*f,padT,padL+cellW*f,H-padB,f===0?"#b08968":"var(--fret)",f===0?6:(f%12===0?2.5:1.5)));}
   for(let s=0;s<strings;s++){svg.appendChild(line(padL,padT+cellH*s,W-padR,padT+cellH*s,"var(--string)",1.4));}
   [3,5,7,9,12].forEach(f=>{const x=padL+cellW*(f-0.5),y=padT+cellH*(strings-1)/2;if(f===12){svg.appendChild(circle(x-8,y-8,4,"#e2e8f0"));svg.appendChild(circle(x+8,y+8,4,"#e2e8f0"));}else{svg.appendChild(circle(x,y,4,"#e2e8f0"));}});
-  for(let s=0;s<strings;s++){const drawS=strings-1-s,open=noteIndex(TUNING[drawS]);for(let f=0;f<=frets;f++){const p=mod(open+f,12);if(scaleSet.has(p)){const x=padL+cellW*(f-0.5),y=padT+cellH*s,isRoot=p===rootIdx;const g=group();g.appendChild(circle(x,y,14,isRoot?"var(--root)":"var(--note)",0.95));let label="";if(mode==="notes")label=NOTES_12[p];else if(mode==="degrees")label=DEGREE_LABELS[mod(p-rootIdx,12)]||"";if(label){const t=text(x,y+4,label);t.setAttribute("font-size","11");t.setAttribute("text-anchor","middle");t.setAttribute("fill","#0b0e14");t.setAttribute("font-weight","700");g.appendChild(t);}svg.appendChild(g);}}}
-  for(let f=0;f<=frets;f++){const t=text(padL+cellW*f+4,H-10,String(f));t.setAttribute("font-size","10");t.setAttribute("fill","#475569");svg.appendChild(t);}
+  for(let s=0;s<strings;s++){const drawS=strings-1-s,open=noteIndex(TUNING[drawS]);for(let f=0;f<=frets;f++){const p=mod(open+f,12);if(scaleSet.has(p)){const x=padL+cellW*(f-0.5),y=padT+cellH*s,isRoot=p===rootIdx;const g=group();g.appendChild(circle(x,y,14,isRoot?"var(--root)":"var(--note)",0.95));let label="";if(mode==="notes")label=NOTES_12[p];else if(mode==="degrees")label=DEGREE_LABELS[mod(p-rootIdx,12)]||"";if(label){const t=text(x,y+4,label);t.setAttribute("font-size","13");t.setAttribute("text-anchor","middle");t.setAttribute("fill","#0b0e14");t.setAttribute("font-weight","700");g.appendChild(t);}svg.appendChild(g);}}}
+  for(let f=0;f<=frets;f++){const t=text(padL+cellW*f+4,H-10,String(f));t.setAttribute("font-size","12");t.setAttribute("fill","#475569");svg.appendChild(t);}
   return svg;
 }
 function rect(x,y,w,h,fill){const e=document.createElementNS("http://www.w3.org/2000/svg","rect");e.setAttribute("x",x);e.setAttribute("y",y);e.setAttribute("width",w);e.setAttribute("height",h);e.setAttribute("fill",fill);return e;}
