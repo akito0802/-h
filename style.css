@@ -88,3 +88,38 @@ button { cursor: pointer; } button:hover { border-color: var(--accent); }
 
 /* Responsive */
 @media (max-width: 640px) { .controls { grid-template-columns: 1fr 1fr; } }
+
+/* Secondary button */
+#theoryBtn { background:#ffffff; border:1px solid #94a3b8; }
+#theoryBtn:hover { border-color: var(--accent); }
+
+/* Theory modal */
+#theoryModal[hidden]{ display:none; }
+#theoryModal{
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.theory-dialog{
+  width: min(720px, 96vw);
+  max-height: 88vh;
+  background: #ffffff; color: var(--text);
+  border-radius: 12px; border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+  display: flex; flex-direction: column;
+}
+.theory-header{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid #e5e7eb; background:#f8fafc;
+}
+#theoryClose{ width:36px;height:36px;border-radius:8px;border:1px solid #cbd5e1;background:#ffffff;font-size:20px; }
+.theory-body{
+  padding: 14px 16px;
+  overflow: auto;
+  line-height: 1.6;
+  font-size: 14px;
+}
+.theory-body .row{ margin-bottom: 10px; }
+.theory-body .label{ display:inline-block; min-width: 7em; color:#64748b; }
+.theory-body code{ background:#f1f5f9; padding:2px 6px; border-radius:6px; }

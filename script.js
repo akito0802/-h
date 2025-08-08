@@ -1,3 +1,132 @@
+const SCALE_THEORY = {
+  "アイオニアン": {
+    "parent": "メジャースケール",
+    "formula": "W-W-H-W-W-W-H（度数: 1 2 3 4 5 6 7）",
+    "typical_chords": "IMaj7, I6, I(add9)",
+    "tensions": "9, 11, 13（#11は避け）",
+    "usage": "メジャートニックでの基本モード。安定・収束。"
+  },
+  "ドリアン": {
+    "parent": "メジャースケール（第2モード）",
+    "formula": "W-H-W-W-W-H-W（1 2 ♭3 4 5 6 ♭7）",
+    "typical_chords": "IIm7, m6, m9",
+    "tensions": "9, 11, 13（6が特徴）",
+    "usage": "IIm7上、またはモーダル曲のmトニックで明るいマイナー感を獲得。"
+  },
+  "フリジアン": {
+    "parent": "メジャースケール（第3モード）",
+    "formula": "H-W-W-W-H-W-W（1 ♭2 ♭3 4 5 ♭6 ♭7）",
+    "typical_chords": "Im7（♭9感）、bIIメジャー関連",
+    "tensions": "♭9, 11, ♭13（♭2が特徴）",
+    "usage": "エスニック/スペイン風。強い半音上行（♭2→1）。"
+  },
+  "リディアン": {
+    "parent": "メジャースケール（第4モード）",
+    "formula": "W-W-W-H-W-W-H（1 2 3 #4 5 6 7）",
+    "typical_chords": "IVMaj7, Maj7(#11)",
+    "tensions": "9, #11, 13（#11が特徴）",
+    "usage": "明るく浮遊感。IV系やモーダルなMajトニック。"
+  },
+  "ミクソリディアン": {
+    "parent": "メジャースケール（第5モード）",
+    "formula": "W-W-H-W-W-H-W（1 2 3 4 5 6 ♭7）",
+    "typical_chords": "V7, X7（属七全般）",
+    "tensions": "9, 11, 13",
+    "usage": "属機能。ブルース/ファンク/モーダルで頻用。"
+  },
+  "エオリアン": {
+    "parent": "メジャースケール（第6モード）",
+    "formula": "W-H-W-W-H-W-W（1 2 ♭3 4 5 ♭6 ♭7）",
+    "typical_chords": "Im7, Im9, Im11",
+    "tensions": "9, 11, ♭13",
+    "usage": "ナチュラルマイナー。暗く安定。"
+  },
+  "ロクリアン": {
+    "parent": "メジャースケール（第7モード）",
+    "formula": "H-W-W-H-W-W-W（1 ♭2 ♭3 4 ♭5 ♭6 ♭7）",
+    "typical_chords": "m7♭5（半減七）",
+    "tensions": "♭9, 11, ♭13（♭5が特徴）",
+    "usage": "IIø7での機能。強い不安定感。"
+  },
+  "リディアン・ドミナント（Mixolydian #11）": {
+    "parent": "メロディックマイナー（第4モード）",
+    "formula": "1 2 3 #4 5 6 ♭7",
+    "typical_chords": "7(#11), IV7, トライトーン代理",
+    "tensions": "9, #11, 13",
+    "usage": "ドミナントに#11色を付与。IV7やV7でジャズ的色彩を強化。"
+  },
+  "アルタード（Super Locrian）": {
+    "parent": "メロディックマイナー（第7モード）",
+    "formula": "1 ♭2 ♯2 3 ♭5 ♯5 ♭7（解釈差あり）",
+    "typical_chords": "V7alt（♭9,♯9,♭5,♯5）",
+    "tensions": "♭9, ♯9, ♭5, ♯5",
+    "usage": "強烈な属→解決。テンション総動員。"
+  },
+  "ホールトーン": {
+    "parent": "対称スケール",
+    "formula": "全音のみ：1 2 3 #4 #5 ♭7",
+    "typical_chords": "7(#5), Aug系",
+    "tensions": "9, #11, #5",
+    "usage": "浮遊感/非機能。オーギュメントやV7#5で使用。"
+  },
+  "ディミニッシュ（H-W）": {
+    "parent": "対称スケール（半→全）",
+    "formula": "1 ♭2 ♯2 3 #4 5 6 ♭7",
+    "typical_chords": "V7(b9,#9)",
+    "tensions": "♭9, ♯9, #11, 13",
+    "usage": "属直前の緊張増幅。シーケンス展開に好適。"
+  },
+  "ディミニッシュ（W-H）": {
+    "parent": "対称スケール（全→半）",
+    "formula": "1 2 ♭3 4 ♭5 ♯5 6 7",
+    "typical_chords": "Dim7",
+    "tensions": "9, 11, ♭13（文脈依存）",
+    "usage": "ディミニッシュ7そのものの音材。"
+  },
+  "フリジアン・ドミナント": {
+    "parent": "ハーモニックマイナー（第5モード）",
+    "formula": "1 ♭2 3 4 5 ♭6 ♭7",
+    "typical_chords": "V7♭9",
+    "tensions": "♭9, 11, ♭13",
+    "usage": "エスニックな属。ラテン/モーダルで映える。"
+  },
+  "ミクソリディアン♭13": {
+    "parent": "メロディックマイナー（第5モード）",
+    "formula": "1 2 3 4 5 ♭6 ♭7",
+    "typical_chords": "V7♭13, IV7",
+    "tensions": "9, 11, ♭13",
+    "usage": "ブルージー×ジャジー。"
+  },
+  "リディアン・オーギュメント": {
+    "parent": "メロディックマイナー（第3モード）",
+    "formula": "1 2 3 #4 ♯5 6 7",
+    "typical_chords": "Maj7(#5)",
+    "tensions": "9, #11, #5, 13",
+    "usage": "Majに拡張感と不安定さを付与。"
+  },
+  "ベバップ・ドミナント": {
+    "parent": "Mixolydian + M7（パッシング）",
+    "formula": "1 2 3 4 5 6 ♭7 7",
+    "typical_chords": "V7",
+    "tensions": "9, 11, 13（M7は通過音）",
+    "usage": "スイング系ライン。拍裏でコードトーン着地。"
+  },
+  "ベバップ・メジャー": {
+    "parent": "Ionian + ♭6（パッシング）",
+    "formula": "1 2 3 4 5 ♭6 6 7",
+    "typical_chords": "IMaj7",
+    "tensions": "9, 11, 13（♭6は通過音）",
+    "usage": "Iメジャーでの8音化。リズミックな通過。"
+  },
+  "ドリアン♭2": {
+    "parent": "メロディックマイナー（第2モード）",
+    "formula": "1 ♭2 ♭3 4 5 6 ♭7",
+    "typical_chords": "m7（b9ニュアンス）, bII関連",
+    "tensions": "♭9, 11, 13",
+    "usage": "エスニック/モーダルなm上。"
+  }
+};
+
 // v14: clean baseline with robust init, fit-to-width zoom, info label
 (function(){
   const onReady = (fn)=> document.readyState !== 'loading' ? fn() : document.addEventListener('DOMContentLoaded', fn);
@@ -341,3 +470,40 @@ const GENRES = {
     img.src=url;
   }
 })();
+
+
+// ---- Theory modal ----
+const theoryBtn = document.getElementById('theoryBtn');
+const theoryModal = document.getElementById('theoryModal');
+const theoryClose = document.getElementById('theoryClose');
+const theoryBody = document.getElementById('theoryBody');
+function openTheory(){
+  const key = document.getElementById('keySelect').value;
+  const scaleSel = document.getElementById('scaleSelect');
+  const scaleName = scaleSel.options[scaleSel.selectedIndex].text.trim();
+  const pureName = scaleName.replace(/^.*?\s*\|\s*/, '').replace(/\s*\|.*$/, '');
+  const info = SCALE_THEORY[pureName] || {};
+  // Also show description if available
+  const desc = (typeof SCALE_DESCRIPTIONS !== 'undefined') ? (SCALE_DESCRIPTIONS[pureName]||'') : '';
+
+  const rows = [
+    ['キー', key],
+    ['スケール', pureName],
+    ['親スケール/モード', info.parent || '-'],
+    ['度数/構成', info.formula || '-'],
+    ['テンション', info.tensions || '-'],
+    ['適用コード', info.typical_chords || '-'],
+    ['使用上の要点', desc || info.usage || '-']
+  ];
+
+  let html = '';
+  for(const [label, val] of rows){
+    html += `<div class="row"><span class="label">${label}</span><span class="value">${val}</span></div>`;
+  }
+  theoryBody.innerHTML = html;
+  theoryModal.hidden = false;
+}
+function closeTheory(){ theoryModal.hidden = true; }
+if(theoryBtn){ theoryBtn.addEventListener('click', openTheory); }
+if(theoryClose){ theoryClose.addEventListener('click', closeTheory); }
+theoryModal?.addEventListener('click', (e)=>{ if(e.target === theoryModal) closeTheory(); });

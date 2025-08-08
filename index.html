@@ -31,6 +31,7 @@
         </select>
       </label>
       <button id="downloadBtn">画像を保存（PNG）</button>
+      <button id="theoryBtn">説明</button>
     </div>
 
     <div class="tension-panel">
@@ -74,5 +75,17 @@
 
   <noscript>このページはJavaScriptを使用します。ブラウザ設定で有効にしてください。</noscript>
   <script src="script.js?v=16"></script>
+
+  <!-- Theory Modal -->
+  <div id="theoryModal" hidden>
+    <div class="theory-dialog" role="dialog" aria-modal="true" aria-labelledby="theoryTitle">
+      <div class="theory-header">
+        <h3 id="theoryTitle">スケールの説明</h3>
+        <button id="theoryClose" aria-label="閉じる">×</button>
+      </div>
+      <div id="theoryBody" class="theory-body"></div>
+    </div>
+  </div>
+
 </body>
 </html>
