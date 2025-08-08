@@ -1,4 +1,4 @@
-// v8: Tension checkboxes, larger cells, cache-busting
+// v9: add scale table section (one-octave notes), tensions support, big cells
 document.addEventListener("DOMContentLoaded", setup);
 
 const NOTES_12 = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -49,7 +49,7 @@ const GENRES = {
   ]
 };
 
-// テンション（半音オフセット、root相対）
+// テンション（半音オフセット）
 const TENSION_MAP = {
   "b9": 1,
   "9": 2,
@@ -89,22 +89,19 @@ function populateScalesByGenre(){
   GENRES[genre].forEach(s=>sel.appendChild(option(s,s)));
 }
 
-function getSelectedTensions(){
-  return $all('.tension:checked').map(el=>el.value);
-}
+function getSelectedTensions(){ return $all('.tension:checked').map(el=>el.value); }
 
 function makeFretboardData(key,scaleName, tensions){
   const root=noteIndex(key);
   const base = SCALE_DEFS[scaleName];
   const tensionSemis = tensions.map(t => TENSION_MAP[t]).filter(v=>v!=null);
-  // base + tensions（12音に正規化）
-  const totalSemis = Array.from(new Set([...base, ...tensionSemis])).map(x=>mod(x,12));
+  const totalSemis = Array.from(new Set([...base, ...tensionSemis])).map(x=>mod(x,12)).sort((a,b)=>a-b);
   const scaleSet = new Set(totalSemis.map(i=>mod(root+i,12)));
-  return {rootIdx:root, scaleSet, tensionSemis};
+  return {rootIdx:root, base, tensionSemis, totalSemis, scaleSet};
 }
 
 function generateSVG(key,scaleName,mode="dots", tensions=[]){
-  const {rootIdx, scaleSet, tensionSemis} = makeFretboardData(key,scaleName,tensions);
+  const {rootIdx, base, tensionSemis, totalSemis, scaleSet} = makeFretboardData(key,scaleName,tensions);
   const strings=6, frets=FRETS;
   const padL=40, padR=20, padT=30, padB=40;
   const W=padL+padR+CELL_W*(frets+1);
@@ -134,7 +131,6 @@ function generateSVG(key,scaleName,mode="dots", tensions=[]){
     else{ svg.appendChild(circle(x,y,5,"#e2e8f0")); }
   });
 
-  // 音ドット
   for(let s=0;s<strings;s++){
     const drawS=strings-1-s; // 上=1弦
     const open=noteIndex(TUNING[drawS]);
@@ -145,9 +141,9 @@ function generateSVG(key,scaleName,mode="dots", tensions=[]){
         const y=padT+CELL_H*s;
         const semis = mod(pitch - rootIdx, 12);
 
-        // 種別判定
         const isRoot = pitch === rootIdx;
         const isTension = tensionSemis.includes(semis);
+        const isBase = (!isTension) && SCALE_DEFS[scaleName].includes(semis);
 
         const g=group();
         const fill = isRoot ? "var(--root)" : (isTension ? "var(--tension)" : "var(--note)");
@@ -158,11 +154,8 @@ function generateSVG(key,scaleName,mode="dots", tensions=[]){
         if(mode==="notes"){
           label=NOTES_12[pitch];
         }else if(mode==="degrees"){
-          if(isTension && SEMI_TO_TENSION[semis]){
-            label = SEMI_TO_TENSION[semis]; // b9, 9, #9, 11, #11, b13, 13
-          }else{
-            label=DEGREE_LABELS[semis]||"";
-          }
+          if(isTension && SEMI_TO_TENSION[semis]) label = SEMI_TO_TENSION[semis];
+          else label=DEGREE_LABELS[semis]||"";
         }
 
         if(label){
@@ -189,6 +182,54 @@ function generateSVG(key,scaleName,mode="dots", tensions=[]){
   return svg;
 }
 
+// ----- Table rendering -----
+function renderScaleTable(key, scaleName, tensions){
+  const host = $("#scaleTable");
+  host.innerHTML = "";
+
+  const {rootIdx, base, tensionSemis, totalSemis} = makeFretboardData(key,scaleName,tensions);
+
+  // Build rows
+  const rows = totalSemis.map(semi => {
+    const pitchIdx = mod(rootIdx + semi, 12);
+    const note = NOTES_12[pitchIdx];
+    const isTension = tensionSemis.includes(semi);
+    const type = isTension ? "テンション" : (semi===0 ? "ルート" : "スケール");
+    const label = isTension ? (SEMI_TO_TENSION[semi] || "") : (DEGREE_LABELS[semi] || "");
+    const badgeClass = isTension ? "badge-tension" : (semi===0 ? "badge-root" : "badge-scale");
+    return {type, badgeClass, label, note, semi};
+  });
+
+  // Create table
+  const table = document.createElement("table");
+  table.className = "table";
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>区分</th>
+        <th>度数</th>
+        <th>音名</th>
+        <th>半音差</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+  const tbody = table.querySelector("tbody");
+
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="badge ${r.badgeClass}">${r.type}</span></td>
+      <td>${r.label || "-"}</td>
+      <td>${r.note}</td>
+      <td>${r.semi}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  host.appendChild(table);
+}
+
 // SVG helpers
 function rect(x,y,w,h,fill){const e=document.createElementNS("http://www.w3.org/2000/svg","rect");e.setAttribute("x",x);e.setAttribute("y",y);e.setAttribute("width",w);e.setAttribute("height",h);e.setAttribute("fill",fill);return e;}
 function line(x1,y1,x2,y2,stroke,w){const e=document.createElementNS("http://www.w3.org/2000/svg","line");e.setAttribute("x1",x1);e.setAttribute("y1",y1);e.setAttribute("x2",x2);e.setAttribute("y2",y2);e.setAttribute("stroke",stroke);e.setAttribute("stroke-width",w);e.setAttribute("stroke-linecap","round");return e;}
@@ -204,6 +245,7 @@ function render(){
   const svg=generateSVG(key,scaleName,mode,tensions);
   $("#fretboard").replaceWith(svg);
   svg.id="fretboard";
+  renderScaleTable(key, scaleName, tensions);
 }
 
 function setup(){
@@ -214,7 +256,7 @@ function setup(){
   ["#keySelect","#scaleSelect","#displayMode"].forEach(sel=>$(sel).addEventListener("change",render));
   document.getElementById("downloadBtn").addEventListener("click",downloadPNG);
 
-  // tension checkbox events
+  // tension events
   document.getElementById("tensionClearBtn").addEventListener("click", ()=>{
     document.querySelectorAll('.tension').forEach(el=>el.checked=false);
     render();

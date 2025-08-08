@@ -7,9 +7,10 @@
   --muted: #64748b;
   --root: #f97316;
   --note: #0ea5e9;
-  --tension: #a78bfa; /* violet */
+  --tension: #a78bfa;
   --fret: #cbd5e1;
   --string: #94a3b8;
+  --row: #ffffff;
 }
 html, body { height: 100%; background: var(--bg); }
 body {
@@ -82,6 +83,32 @@ button:hover { border-color: var(--accent); }
   border: 1px solid #cbd5e1;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
+
+#tableSection { padding: 12px; }
+#tableSection h2 { font-size: 16px; margin: 8px 0 10px; color: var(--muted); }
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--row);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.table th, .table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  font-size: 14px;
+}
+.table th {
+  text-align: left;
+  background: #f8fafc;
+  color: #475569;
+}
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+.badge-root { background: #fee2c5; color: #7a3e00; }
+.badge-scale { background: #dbeafe; color: #1e40af; }
+.badge-tension { background: #ede9fe; color: #5b21b6; }
+
 @media (max-width: 640px) {
   .controls { grid-template-columns: 1fr 1fr; }
 }
