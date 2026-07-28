@@ -5,8 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>スケール指板ビューア</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .site-menu-button{position:fixed;top:14px;left:14px;z-index:10001;display:grid;place-items:center;width:42px;height:42px;padding:0;border:1px solid rgba(0,0,0,.14);border-radius:12px;background:rgba(255,255,255,.94);color:#1f2937;font-size:1.35rem;line-height:1;box-shadow:0 6px 18px rgba(0,0,0,.12);cursor:pointer}
+    .site-menu-overlay{position:fixed;inset:0;z-index:9998;background:rgba(17,24,39,.42);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,visibility .2s ease}
+    .site-menu-overlay.open{opacity:1;visibility:visible;pointer-events:auto}
+    .site-side-menu{position:fixed;top:0;left:0;z-index:9999;width:min(82vw,300px);height:100dvh;padding:24px 18px;background:#fff;box-shadow:14px 0 34px rgba(0,0,0,.2);transform:translateX(-110%);visibility:hidden;transition:transform .22s ease,visibility .22s ease;box-sizing:border-box;text-align:left}
+    .site-side-menu.open{transform:translateX(0);visibility:visible}
+    .site-side-menu-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+    .site-side-menu-head h2{margin:0;font-size:1.15rem}
+    .site-menu-close{width:36px;height:36px;border:0;border-radius:10px;background:#f1f1f1;font-size:1.3rem;cursor:pointer}
+    .site-menu-link{display:flex;align-items:center;gap:12px;width:100%;padding:14px 12px;margin-bottom:8px;border-radius:12px;color:#1f2937;background:transparent;text-decoration:none;font-weight:700;box-sizing:border-box}
+    .site-menu-link:hover,.site-menu-link:focus{background:#eef3f8}
+    .site-menu-link.current{background:#dfeaf5}
+    .site-menu-icon{width:28px;text-align:center;font-size:1.15rem}
+    @media(max-width:680px){.site-menu-button{top:10px;left:10px;width:38px;height:38px}}
+  </style>
 </head>
 <body>
+  <div id="siteMenuOverlay" class="site-menu-overlay"></div>
+  <nav id="siteSideMenu" class="site-side-menu" aria-hidden="true" aria-label="サイトメニュー">
+    <div class="site-side-menu-head"><h2>メニュー</h2><button id="siteMenuCloseBtn" class="site-menu-close" type="button" aria-label="メニューを閉じる">×</button></div>
+    <a class="site-menu-link" href="https://akito0802.github.io/NEET-note/"><span class="site-menu-icon">📝</span><span>NEET NOTE</span></a>
+    <a class="site-menu-link" href="https://akito0802.github.io/scale/"><span class="site-menu-icon">🎸</span><span>Scale</span></a>
+    <a class="site-menu-link current" href="./"><span class="site-menu-icon">🎵</span><span>-h</span></a>
+  </nav>
+  <button id="siteMenuOpenBtn" class="site-menu-button" type="button" aria-label="メニューを開く" aria-expanded="false">☰</button>
+
   <header>
     <h1>スケール指板ビューア</h1>
     <div class="controls">
@@ -67,7 +91,6 @@
     <p>標準チューニング E A D G B E / 12フレット / スマホ対応</p>
   </footer>
 
-  <!-- Minimal fullscreen overlay -->
   <div id="zoomOverlay" hidden>
     <div id="zoomStage"></div>
     <div id="zoomInfoLabel" aria-live="polite"></div>
@@ -76,7 +99,6 @@
   <noscript>このページはJavaScriptを使用します。ブラウザ設定で有効にしてください。</noscript>
   <script src="script.js?v=16"></script>
 
-  <!-- Theory Modal -->
   <div id="theoryModal" hidden>
     <div class="theory-dialog" role="dialog" aria-modal="true" aria-labelledby="theoryTitle">
       <div class="theory-header">
@@ -87,5 +109,31 @@
     </div>
   </div>
 
+  <script>
+    (() => {
+      const openButton = document.getElementById('siteMenuOpenBtn');
+      const closeButton = document.getElementById('siteMenuCloseBtn');
+      const menu = document.getElementById('siteSideMenu');
+      const overlay = document.getElementById('siteMenuOverlay');
+      const open = () => {
+        menu.classList.add('open');
+        overlay.classList.add('open');
+        menu.setAttribute('aria-hidden','false');
+        openButton.setAttribute('aria-expanded','true');
+        document.body.style.overflow='hidden';
+      };
+      const close = () => {
+        menu.classList.remove('open');
+        overlay.classList.remove('open');
+        menu.setAttribute('aria-hidden','true');
+        openButton.setAttribute('aria-expanded','false');
+        document.body.style.overflow='';
+      };
+      openButton.addEventListener('click', open);
+      closeButton.addEventListener('click', close);
+      overlay.addEventListener('click', close);
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+    })();
+  </script>
 </body>
 </html>
