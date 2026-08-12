@@ -1,2 +1,48 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#d9c7a8"><title>スケール指板ビューア</title><link rel="stylesheet" href="style.css?v=20"></head><body><header><h1>スケール指板ビューア</h1><div class="controls"><label>楽器<select id="instrumentSelect"><option value="guitar">🎸 ギター</option><option value="bass">🎸 ベース</option><option value="ukulele">🪕 ウクレレ</option><option value="piano">🎹 ピアノ</option></select></label><label>キー<select id="keySelect"></select></label><label>ジャンル<select id="genreSelect"></select></label><label>スケール<select id="scaleSelect"></select></label><label>表示<select id="displayMode"><option value="dots">● ドット</option><option value="notes">♪ 音名</option><option value="degrees">度数</option></select></label><button id="downloadBtn">画像を保存（PNG）</button><button id="theoryBtn" type="button">詳しい説明</button></div><div id="instrumentBadge" class="instrument-badge"></div><div class="tension-panel"><div class="tension-title">テンション追加：</div><div class="tension-list"><label><input type="checkbox" class="tension" value="b9"> b9</label><label><input type="checkbox" class="tension" value="9"> 9</label><label><input type="checkbox" class="tension" value="#9"> #9</label><label><input type="checkbox" class="tension" value="11"> 11</label><label><input type="checkbox" class="tension" value="#11"> #11</label><label><input type="checkbox" class="tension" value="b13"> b13</label><label><input type="checkbox" class="tension" value="13"> 13</label></div><div class="tension-actions"><button id="tensionClearBtn">クリア</button></div></div></header><main><div id="fretboardWrapper"><svg id="fretboard"></svg><div class="hint">※表示をタップで全画面（もう一度タップで閉じる）</div></div><section id="tableSection"><h2>構成音（1オクターブ）</h2><div id="scaleTable"></div></section></main><footer><p id="instrumentInfo"></p></footer><div id="zoomOverlay" hidden><div id="zoomStage"></div><div id="zoomInfoLabel"></div></div><div id="theoryModal" hidden><div class="theory-dialog"><div class="theory-header"><h3>スケールの説明</h3><button id="theoryClose">×</button></div><div id="theoryBody" class="theory-body"></div></div></div><script src="script.js?v=18"></script><script src="mobile-ui.js?v=1"></script><script>document.getElementById('theoryBtn').addEventListener('click',function(e){e.preventDefault();e.stopImmediatePropagation();const s=document.getElementById('scaleSelect')?.value||'メジャー（Ionian）',k=document.getElementById('keySelect')?.value||'C';location.href='scale-guide.html?scale='+encodeURIComponent(s)+'&key='+encodeURIComponent(k)},true);</script></body></html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#d9c7a8"><title>スケール指板ビューア</title><link rel="stylesheet" href="style.css?v=21"></head><body>
+<div class="app-shell">
+  <aside class="side-rail">
+    <a class="brand" href="https://akito0802.github.io/NEET-note/"><span class="brand-icon">🎸</span><span><b>NEETNOTE</b><small>指板 × 理論</small></span></a>
+    <nav class="side-nav">
+      <a class="active" href="./">🎼 <span>スケール</span></a>
+      <a href="https://akito0802.github.io/Cordhyo-/index.html">▦ <span>コード</span></a>
+      <a href="https://akito0802.github.io/NEET-note/theory-assist.html">🧠 <span>理論アシスト</span></a>
+      <a href="https://akito0802.github.io/NEET-note/tools.html">🧰 <span>ツール</span></a>
+    </nav>
+    <div class="instrument-switch-title">楽器切替</div>
+    <div class="instrument-switch" id="instrumentQuickSwitch">
+      <button data-inst="guitar" class="active">🎸 ギター</button><button data-inst="bass">🎸 ベース</button><button data-inst="piano">🎹 ピアノ</button><button data-inst="ukulele">🪕 ウクレレ</button>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <section class="top-card">
+      <div class="top-row">
+        <label>キー<select id="keySelect"></select></label>
+        <label class="scale-field">スケール<select id="scaleSelect"></select></label>
+        <label>ジャンル<select id="genreSelect"></select></label>
+        <label>表示<select id="displayMode"><option value="dots">● ドット</option><option value="notes">♪ 音名</option><option value="degrees">度数</option></select></label>
+        <select id="instrumentSelect" class="hidden-select"><option value="guitar">ギター</option><option value="bass">ベース</option><option value="ukulele">ウクレレ</option><option value="piano">ピアノ</option></select>
+      </div>
+      <div class="title-row"><div><span class="eyebrow">CURRENT SCALE</span><h1 id="scaleHeroTitle">C メジャー（Ionian）</h1><div id="instrumentBadge" class="instrument-badge"></div></div><div class="hero-actions"><button id="downloadBtn">画像を保存</button><button id="theoryBtn">📖 詳しい説明</button></div></div>
+    </section>
+
+    <section class="fret-card">
+      <div class="section-head"><div><span class="eyebrow">FRETBOARD</span><h2>指板で確認</h2></div><span class="hint">タップで全画面</span></div>
+      <div id="fretboardWrapper"><svg id="fretboard"></svg></div>
+      <div class="legend"><span><i class="dot root"></i>ルート</span><span><i class="dot note"></i>構成音</span><span><i class="dot tension"></i>テンション</span></div>
+    </section>
+
+    <section class="lower-grid">
+      <section id="tableSection" class="info-card"><div class="section-head"><div><span class="eyebrow">NOTES</span><h2>構成音</h2></div></div><div id="scaleTable"></div></section>
+      <section class="info-card"><div class="section-head"><div><span class="eyebrow">TENSION</span><h2>テンション追加</h2></div></div><div class="tension-list"><label><input type="checkbox" class="tension" value="b9">♭9</label><label><input type="checkbox" class="tension" value="9">9</label><label><input type="checkbox" class="tension" value="#9">♯9</label><label><input type="checkbox" class="tension" value="11">11</label><label><input type="checkbox" class="tension" value="#11">♯11</label><label><input type="checkbox" class="tension" value="b13">♭13</label><label><input type="checkbox" class="tension" value="13">13</label></div><button id="tensionClearBtn" class="clear-btn">クリア</button></section>
+    </section>
+
+    <section class="flow-card"><b>使い方の流れ</b><span>① キーとスケールを選ぶ</span><em>→</em><span>② 指板で位置を確認</span><em>→</em><span>③ 詳しい説明で理解</span><em>→</em><span>④ 練習して定着</span></section>
+    <footer><p id="instrumentInfo"></p></footer>
+  </main>
+</div>
+<div id="zoomOverlay" hidden><div id="zoomStage"></div><div id="zoomInfoLabel"></div></div>
+<script src="script.js?v=18"></script><script>
+const qs=s=>document.querySelector(s);function syncHero(){const k=qs('#keySelect')?.value||'C',s=qs('#scaleSelect')?.value||'';qs('#scaleHeroTitle').textContent=`${k} ${s}`;document.querySelectorAll('[data-inst]').forEach(b=>b.classList.toggle('active',b.dataset.inst===qs('#instrumentSelect').value))}['keySelect','scaleSelect','genreSelect','instrumentSelect'].forEach(id=>qs('#'+id)?.addEventListener('change',()=>setTimeout(syncHero,0)));document.querySelectorAll('[data-inst]').forEach(b=>b.addEventListener('click',()=>{qs('#instrumentSelect').value=b.dataset.inst;qs('#instrumentSelect').dispatchEvent(new Event('change',{bubbles:true}))}));qs('#theoryBtn').addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();location.href='scale-guide.html?scale='+encodeURIComponent(qs('#scaleSelect').value)+'&key='+encodeURIComponent(qs('#keySelect').value)},true);setTimeout(syncHero,0);
+</script></body></html>
