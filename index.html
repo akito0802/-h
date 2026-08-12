@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#d9c7a8"><title>スケール指板ビューア</title><link rel="stylesheet" href="style.css?v=21"></head><body>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#d9c7a8"><title>スケール指板ビューア</title><link rel="stylesheet" href="style.css?v=22"></head><body>
 <div class="app-shell">
   <aside class="side-rail">
     <a class="brand" href="https://akito0802.github.io/NEET-note/"><span class="brand-icon">🎸</span><span><b>NEETNOTE</b><small>指板 × 理論</small></span></a>
@@ -17,6 +17,7 @@
 
   <main class="workspace">
     <section class="top-card">
+      <div class="mobile-page-head"><div><span class="eyebrow">NEETNOTE</span><b>指板 × 理論</b></div><button id="mobileInstrumentBtn" type="button">🎸 楽器</button></div>
       <div class="top-row">
         <label>キー<select id="keySelect"></select></label>
         <label class="scale-field">スケール<select id="scaleSelect"></select></label>
@@ -27,22 +28,27 @@
       <div class="title-row"><div><span class="eyebrow">CURRENT SCALE</span><h1 id="scaleHeroTitle">C メジャー（Ionian）</h1><div id="instrumentBadge" class="instrument-badge"></div></div><div class="hero-actions"><button id="downloadBtn">画像を保存</button><button id="theoryBtn">📖 詳しい説明</button></div></div>
     </section>
 
-    <section class="fret-card">
-      <div class="section-head"><div><span class="eyebrow">FRETBOARD</span><h2>指板で確認</h2></div><span class="hint">タップで全画面</span></div>
-      <div id="fretboardWrapper"><svg id="fretboard"></svg></div>
+    <section class="fret-card" id="fretSection">
+      <div class="section-head"><div><span class="eyebrow">FRETBOARD</span><h2>指板で確認</h2></div><span class="hint">横にスワイプ / タップで全画面</span></div>
+      <div id="fretboardWrapper"><svg id="fretboard" viewBox="0 0 1580 480" aria-label="指板を読み込み中"></svg></div>
       <div class="legend"><span><i class="dot root"></i>ルート</span><span><i class="dot note"></i>構成音</span><span><i class="dot tension"></i>テンション</span></div>
     </section>
 
-    <section class="lower-grid">
+    <section class="lower-grid" id="notesSection">
       <section id="tableSection" class="info-card"><div class="section-head"><div><span class="eyebrow">NOTES</span><h2>構成音</h2></div></div><div id="scaleTable"></div></section>
-      <section class="info-card"><div class="section-head"><div><span class="eyebrow">TENSION</span><h2>テンション追加</h2></div></div><div class="tension-list"><label><input type="checkbox" class="tension" value="b9">♭9</label><label><input type="checkbox" class="tension" value="9">9</label><label><input type="checkbox" class="tension" value="#9">♯9</label><label><input type="checkbox" class="tension" value="11">11</label><label><input type="checkbox" class="tension" value="#11">♯11</label><label><input type="checkbox" class="tension" value="b13">♭13</label><label><input type="checkbox" class="tension" value="13">13</label></div><button id="tensionClearBtn" class="clear-btn">クリア</button></section>
+      <section class="info-card" id="tensionSection"><div class="section-head"><div><span class="eyebrow">TENSION</span><h2>テンション追加</h2></div></div><div class="tension-list"><label><input type="checkbox" class="tension" value="b9">♭9</label><label><input type="checkbox" class="tension" value="9">9</label><label><input type="checkbox" class="tension" value="#9">♯9</label><label><input type="checkbox" class="tension" value="11">11</label><label><input type="checkbox" class="tension" value="#11">♯11</label><label><input type="checkbox" class="tension" value="b13">♭13</label><label><input type="checkbox" class="tension" value="13">13</label></div><button id="tensionClearBtn" class="clear-btn">クリア</button></section>
     </section>
 
     <section class="flow-card"><b>使い方の流れ</b><span>① キーとスケールを選ぶ</span><em>→</em><span>② 指板で位置を確認</span><em>→</em><span>③ 詳しい説明で理解</span><em>→</em><span>④ 練習して定着</span></section>
     <footer><p id="instrumentInfo"></p></footer>
   </main>
 </div>
+
+<nav class="mobile-bottom-nav" aria-label="スマホ用ナビ"><a href="#fretSection">🎸<span>指板</span></a><a href="#notesSection">🎼<span>構成音</span></a><a href="#tensionSection">＋<span>テンション</span></a><button id="mobileTheoryBtn" type="button">📖<span>解説</span></button></nav>
+<div id="mobileInstrumentSheet" class="mobile-sheet" hidden><button class="sheet-bg" aria-label="閉じる"></button><div class="sheet-panel"><div class="sheet-handle"></div><h3>楽器を選ぶ</h3><button data-mobile-inst="guitar">🎸 ギター</button><button data-mobile-inst="bass">🎸 ベース</button><button data-mobile-inst="piano">🎹 ピアノ</button><button data-mobile-inst="ukulele">🪕 ウクレレ</button></div></div>
+
 <div id="zoomOverlay" hidden><div id="zoomStage"></div><div id="zoomInfoLabel"></div></div>
-<script src="script.js?v=18"></script><script>
-const qs=s=>document.querySelector(s);function syncHero(){const k=qs('#keySelect')?.value||'C',s=qs('#scaleSelect')?.value||'';qs('#scaleHeroTitle').textContent=`${k} ${s}`;document.querySelectorAll('[data-inst]').forEach(b=>b.classList.toggle('active',b.dataset.inst===qs('#instrumentSelect').value))}['keySelect','scaleSelect','genreSelect','instrumentSelect'].forEach(id=>qs('#'+id)?.addEventListener('change',()=>setTimeout(syncHero,0)));document.querySelectorAll('[data-inst]').forEach(b=>b.addEventListener('click',()=>{qs('#instrumentSelect').value=b.dataset.inst;qs('#instrumentSelect').dispatchEvent(new Event('change',{bubbles:true}))}));qs('#theoryBtn').addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();location.href='scale-guide.html?scale='+encodeURIComponent(qs('#scaleSelect').value)+'&key='+encodeURIComponent(qs('#keySelect').value)},true);setTimeout(syncHero,0);
+<div id="theoryModal" hidden><div class="theory-dialog"><div class="theory-header"><h3>スケールの説明</h3><button id="theoryClose" type="button">×</button></div><div id="theoryBody" class="theory-body"></div></div></div>
+<script src="script.js?v=19"></script><script>
+const qs=s=>document.querySelector(s);function syncHero(){const k=qs('#keySelect')?.value||'C',s=qs('#scaleSelect')?.value||'';qs('#scaleHeroTitle').textContent=`${k} ${s}`;document.querySelectorAll('[data-inst]').forEach(b=>b.classList.toggle('active',b.dataset.inst===qs('#instrumentSelect').value))}['keySelect','scaleSelect','genreSelect','instrumentSelect'].forEach(id=>qs('#'+id)?.addEventListener('change',()=>setTimeout(syncHero,0)));document.querySelectorAll('[data-inst]').forEach(b=>b.addEventListener('click',()=>{qs('#instrumentSelect').value=b.dataset.inst;qs('#instrumentSelect').dispatchEvent(new Event('change',{bubbles:true}))}));const openGuide=()=>location.href='scale-guide.html?scale='+encodeURIComponent(qs('#scaleSelect').value)+'&key='+encodeURIComponent(qs('#keySelect').value);qs('#theoryBtn').addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();openGuide()},true);qs('#mobileTheoryBtn').onclick=openGuide;const sheet=qs('#mobileInstrumentSheet');qs('#mobileInstrumentBtn').onclick=()=>sheet.hidden=false;sheet.querySelector('.sheet-bg').onclick=()=>sheet.hidden=true;sheet.querySelectorAll('[data-mobile-inst]').forEach(b=>b.onclick=()=>{qs('#instrumentSelect').value=b.dataset.mobileInst;qs('#instrumentSelect').dispatchEvent(new Event('change',{bubbles:true}));sheet.hidden=true});setTimeout(syncHero,0);
 </script></body></html>
