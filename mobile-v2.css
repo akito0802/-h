@@ -1,0 +1,72 @@
+@media (max-width:620px){
+  :root{--mobile-gap:8px}
+  body{padding-bottom:78px;background:#e3d4ba;overflow-x:hidden}
+  .workspace{padding:8px 8px 22px!important}
+  .mobile-page-head{margin:0 2px 8px!important;min-height:42px}
+  .mobile-page-head .eyebrow{font-size:.55rem;letter-spacing:.1em}
+  .mobile-page-head b{font-size:.92rem!important;line-height:1.15}
+  .mobile-page-head button{padding:8px 11px!important;font-size:.76rem;min-height:38px}
+
+  .top-card{padding:10px!important;border-radius:16px!important}
+  .top-row{display:grid!important;grid-template-columns:78px minmax(0,1fr)!important;gap:7px!important}
+  .top-row label{gap:4px!important;padding:0!important;font-size:.58rem!important;letter-spacing:.02em}
+  .top-row label:nth-child(1){grid-column:1/2!important;grid-row:1}
+  .top-row label:nth-child(2){grid-column:2/3!important;grid-row:1}
+  .top-row label:nth-child(3){grid-column:1/2!important;grid-row:2}
+  .top-row label:nth-child(4){grid-column:2/3!important;grid-row:2}
+  .top-row select{min-height:42px!important;height:42px!important;padding:0 9px!important;border-radius:10px!important;font-size:.8rem!important;white-space:nowrap;text-overflow:ellipsis}
+  .scale-field select{font-size:.82rem!important;font-weight:900!important}
+
+  .title-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;align-items:center!important;margin-top:9px!important;padding-top:9px!important}
+  .title-row>div:first-child{min-width:0}
+  .title-row .eyebrow{display:none}
+  .title-row h1{margin:0!important;font-size:1rem!important;line-height:1.25!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .instrument-badge{margin-top:5px!important;padding:4px 7px!important;font-size:.62rem!important}
+  .hero-actions{width:auto!important;display:grid!important;grid-template-columns:42px 42px!important;gap:6px!important}
+  .hero-actions button{width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;padding:0!important;border-radius:11px!important;font-size:0!important;display:grid;place-items:center}
+  .hero-actions #downloadBtn:before{content:'⇩';font-size:1.08rem;color:#5f4b31}
+  .hero-actions #theoryBtn:before{content:'📖';font-size:1rem}
+
+  .fret-card{margin-top:8px!important;padding:9px!important;border-radius:16px!important}
+  .section-head{margin-bottom:7px!important;align-items:center!important}
+  .section-head .eyebrow{display:none}
+  .section-head h2{margin:0!important;font-size:.9rem!important}
+  .fret-card .hint{font-size:0!important;max-width:none!important}
+  .fret-card .hint:after{content:'横スワイプ';font-size:.58rem;color:var(--muted);font-weight:800}
+  #fretboardWrapper{margin:0!important;padding:4px!important;min-height:0!important;border-radius:11px!important;background:#fff!important;overflow-x:auto!important;overscroll-behavior-x:contain;scrollbar-width:none}
+  #fretboardWrapper::-webkit-scrollbar{display:none}
+  #fretboard{min-width:700px!important;width:700px!important;border-radius:8px!important}
+  .legend{margin-top:7px!important;gap:8px!important;font-size:.61rem!important;justify-content:center}
+  .dot{width:8px!important;height:8px!important}
+
+  .lower-grid{gap:8px!important;margin-top:8px!important}
+  .info-card{padding:10px!important;border-radius:16px!important}
+  #tableSection .section-head{margin-bottom:7px!important}
+  #scaleTable{margin:0 -2px;overflow-x:auto;scrollbar-width:none}
+  #scaleTable::-webkit-scrollbar{display:none}
+  .table{min-width:470px}
+  .table th,.table td{padding:7px 8px!important;font-size:.68rem!important}
+  .badge{font-size:.62rem!important;padding:3px 6px!important}
+
+  #tensionSection .section-head{margin-bottom:7px!important}
+  .tension-list{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;overflow:visible!important}
+  .tension-list label{min-width:0!important;padding:9px 4px!important;font-size:.72rem!important;justify-content:center!important;border-radius:10px!important}
+  .tension-list label:nth-child(5),.tension-list label:nth-child(6),.tension-list label:nth-child(7){grid-column:span 1}
+  .clear-btn{margin-top:7px!important;min-height:40px!important;padding:8px!important;font-size:.74rem!important}
+
+  footer{padding:8px 0 0!important;font-size:.62rem!important}
+  .mobile-bottom-nav{left:8px!important;right:8px!important;bottom:max(6px,env(safe-area-inset-bottom))!important;padding:4px!important;border-radius:16px!important}
+  .mobile-bottom-nav a,.mobile-bottom-nav button{min-height:46px!important;font-size:.92rem!important}
+  .mobile-bottom-nav span{font-size:.55rem!important}
+
+  .sheet-panel{padding:9px 12px calc(12px + env(safe-area-inset-bottom))!important}
+  .sheet-panel h3{font-size:.95rem!important;margin-bottom:7px!important}
+  .sheet-panel>button{margin-top:6px!important;padding:12px!important;font-size:.82rem!important}
+}
+
+@media (max-width:380px){
+  .top-row{grid-template-columns:72px minmax(0,1fr)!important}
+  .top-row select{font-size:.75rem!important;padding:0 7px!important}
+  #fretboard{min-width:660px!important;width:660px!important}
+  .tension-list{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
